@@ -1,0 +1,102 @@
+/*
+* This is a manifest file...
+*
+*= require_tree .
+*= require_self
+*/
+
+/* ======= general ======= */
+body {
+  font-family:"Ariel", sans-serif;
+}
+.logo {
+  width: 83.33%;
+}
+
+/* ======= rows & columns ======= */
+.row, .column {
+  box-sizing: border-box;
+}
+.row {
+  overflow: auto;
+  /*border: 1px solid rebeccapurple;*/
+}
+.column {
+  float: left;
+  text-align: center;
+  /*border: 1px solid Tomato;*/
+}
+.column:before {
+  /*content: "\00a0";*/
+}
+
+/* ======= columns ======= */
+.column-1 { width: 8.333%; }
+.column-2 { width: 16.66%; }
+.column-3 { width: 25%; }
+.column-4 { width: 33.33%; }
+.column-5 { width: 41.66%; }
+.column-6 { width: 50%; }
+.column-7 { width: 58.33%; }
+.column-8 { width: 66.66%; }
+.column-9 { width: 75%; }
+.column-10 { width: 83.33%; }
+.column-11 { width: 91.66%; }
+.column-12 { width: 100%; }
+
+/* ======= rows ======= */
+.header > .column {
+  height: 80px;
+}
+.navbar1 > .column {
+  height: 40px;
+}
+.content > .column {
+  height: auto;
+}
+.info > .column {
+  height: 40px;
+}
+.footer > .column {
+  height: 100px;
+}
+
+/* ======= content ======= */
+h1 {
+    color: rebeccapurple;
+}
+.section {
+    margin: 0 20px 10px 20px;
+    background-color: #ffe6cc;
+}
+.sectionTitle {
+    margin: 20px 20px 0 20px;
+    padding: 2px;
+    background-color: #DAA520;
+}
+
+/* ======= charts ======= */
+#chartDiv div {
+    background-color: steelblue;
+}
+
+#chartManual rect {
+    fill: steelblue;
+}
+#chartManual text {
+    fill: red;
+    font: 10px sans-serif;
+    text-anchor: end;
+}
+
+#chartManual, #chartDiv, #chartSvg, #chartRemote, #chartHorizontal, #scatterPlot {
+    /*margin-top: 10px;*/
+    padding: 10px;
+    /*border: 1px solid rebeccapurple;*/
+}
+/*.3Dbar:hover {
+  fill: #ace63c;
+}*/
+g.hover {
+    background-color: rgba(0, 0, 0, .5);
+}

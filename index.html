@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+	  <!-- ======= ======= ======= styles ======= ======= ======= -->
+		<title>d3 samples</title>
+		<meta name="description" content="">
+		<link rel="stylesheet" href="styles.css" type="text/css">
+		<filter id="dropshadow" height="130%">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="3"/> <!-- stdDeviation is how much to blur -->
+			<feOffset dx="2" dy="2" result="offsetblur"/> <!-- how much to offset -->
+			<feMerge>
+				<feMergeNode/> <!-- this contains the offset blurred image -->
+				<feMergeNode in="SourceGraphic"/> <!-- this contains the element that the filter is applied to -->
+			</feMerge>
+		</filter>
+
+	</head>
+	<body>
+
+		<!-- ======= ======= ======= header ======= ======= ======= -->
+		<div class="row header">
+			<div class="column column-12"><h1>d3 samples</h1></div>
+		</div>
+
+		<!-- ======= ======= ======= content ======= ======= ======= -->
+		<div class="row content">
+			<div class="column column-1">&nbsp;</div>
+			<div class="column column-10">
+				<div id="tooltips"></div>
+
+				<!-- ======= scatter graphs ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> SCATTER GRAPHS </p>
+				</div>
+				<div class="section">
+					<svg id="scatterGraphs"></svg>
+				</div>
+
+				<!-- ======= scatter plot ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> SCATTER PLOT </p>
+				</div>
+				<div class="section">
+					<div id="scatterPlot"></div>
+				</div>
+
+				<!-- ======= horizontal chart ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> HORIZONTAL CHART </p>
+				</div>
+				<div class="section">
+					<div id="chartHorizontal"></div>
+				</div>
+
+				<!-- ======= remote chart ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> REMOTE CHART </p>
+				</div>
+				<div class="section">
+					<svg id="chartRemote"></svg>
+				</div>
+
+				<!-- ======= svg chart ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> SVG CHART </p>
+				</div>
+				<div class="section">
+					<svg id="chartSvg"></svg>
+				</div>
+
+				<!-- ======= div chart ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> DIV CHART </p>
+				</div>
+				<div class="section">
+					<div id="chartDiv"></div>
+				</div>
+
+				<!-- ======= manual data chart ======= -->
+				<div class="sectionTitle">
+					<p class="title"> MANUAL DATA CHART </p>
+				</div>
+				<div class="section">
+					<svg id="chartManual" width="420" height="120">
+						<g transform="translate(0,0)">
+							<rect width="40" height="19"></rect>
+							<text class="manLabel" x="37" y="9.5" dy=".35em">4</text>
+						</g>
+						<g transform="translate(10,20)">
+					        <rect width="80" height="19"></rect>
+					        <text class="manLabel" x="77" y="9.5" dy=".35em">8</text>
+					    </g>
+					    <g transform="translate(20,40)">
+					        <rect width="150" height="19"></rect>
+					        <text class="manLabel" x="147" y="9.5" dy=".35em">15</text>
+					    </g>
+					    <g transform="translate(30,60)">
+					        <rect width="160" height="19"></rect>
+					        <text class="manLabel" x="157" y="9.5" dy=".35em">16</text>
+					    </g>
+					    <g transform="translate(40,80)">
+					        <rect width="230" height="19"></rect>
+					        <text class="manLabel" x="227" y="9.5" dy=".35em">23</text>
+					    </g>
+					    <g transform="translate(50,100)">
+					        <rect width="420" height="19"></rect>
+					        <text class="manLabel" x="360" y="9.5" dy=".35em">42</text>
+					    </g>
+					</svg>
+				</div>
+
+			</div>
+			<div class="column column-1">&nbsp;</div>
+		</div>
+
+		<!-- ======= ======= ======= info ======= ======= ======= -->
+		<div class="row info">
+			<div class="column column-2">&nbsp;</div>
+			<div class="column column-10">&nbsp;</div>
+		</div>
+
+		<!-- ======= ======= ======= footer ======= ======= ======= -->
+		<div class="row footer">
+			<div class="column column-12">
+				<a href="http://tombeach.github.io/">tombeach</a>
+			</div>
+		</div>
+
+		<!-- ======= ======= ======= scripts ======= ======= ======= -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+		<script type="text/javascript" src="d3skills.js"></script>
+		<script type="text/javascript" src="script.js"></script>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+
+				var bootstrap3_enabled = (typeof $().emulateTransitionEnd == 'function');
+			    console.log("bootstrap3_enabled: " + bootstrap3_enabled);
+				console.log('jQuery loaded');
+				console.log('document ready');
+
+				initScatterGraphs();
+				initScatterPlot();
+				initHorizontalChart();
+				initDivChart();
+				initSvgChart();
+				initRemoteChart();
+				// initSkillsChart();
+
+			});
+		</script>
+
+	</body>
+</html>
+
+
+<!-- ======= ======= ======= ARCHIVE ======= ======= =======
+
+
+-->
