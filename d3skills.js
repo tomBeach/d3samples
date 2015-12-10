@@ -4,44 +4,44 @@ function initScatterGraphs() {
     console.log("initScatterGraphs");
 
     // ======= data granularity =======
-    var barOuterPad = .2;       // space before/after x labels
-    var barPad = .1;            // space between x labels
+    var barOuterPad = .2;
+    var barPad = .1;
     var colors = ['red','green','gray','blue','olive','lawngreen','purple','while','tomato','yellow'];
     var tooltips = ['red','green','gray','blue','olive','lawngreen','purple','while','tomato','yellow'];
 
     // ======= chart formatting =======
     var margin = {top: 20, right: 20, bottom: 30, left: 60},
-        width = 720 - margin.left - margin.right,       // outer width of chart
-        height = 500 - margin.top - margin.bottom;      // outer height of chart
+        width = 720 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
     // ======= scale mapping (data to display) =======
-    var label = d3.scale.ordinal()              // function that sorts data alphabetically
+    var label = d3.scale.ordinal()
         .rangeRoundBands([0, width], barPad, barOuterPad);
-    var x = d3.scale.linear()               // function that maps data domain (below) to output range
-        .range([0, width]);                 // fits max data value into max chart width
-    var y = d3.scale.linear()               // function that maps data domain (below) to output range
-        .range([height, 0]);                // fits max data value into max chart height
+    var x = d3.scale.linear()
+        .range([0, width]);
+    var y = d3.scale.linear()
+        .range([height, 0]);
     var colorScale = d3.scale.quantize()
                     .domain([0, colors.length])
                     .range(colors);
 
     // ======= scale label formating =======
-    var labelAxis = d3.svg.axis()   // existing x scale function is bound to xAxis
-        .scale(label)               // x scale becomes scale function of xAxis object
-        .orient("bottom");      // specifies location of axis (top/bottom/left/right)
-    var xAxis = d3.svg.axis()   // existing x scale function is bound to xAxis
-        .scale(x)               // x scale becomes scale function of xAxis object
-        .orient("bottom");      // specifies location of axis (top/bottom/left/right)
+    var labelAxis = d3.svg.axis()
+        .scale(label)
+        .orient("bottom");
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
     var yAxis = d3.svg.axis()
-        .scale(y)               // existing y scale function is bound to yAxis as yAxis function
-        .orient("left")         // specifies location of axis (top/bottom/left/right)
-        .ticks(5);              // number of ticks (axis labels)
+        .scale(y)
+        .orient("left")
+        .ticks(5);
 
     // ======= build svg objects =======
-    var svg = d3.select("#scatterGraphs")                      // create and append svg element to container
-        .attr("width", width + margin.left + margin.right)      // offset chart top/left/right/bottom by margin dimensions
+    var svg = d3.select("#scatterGraphs")
+        .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-        .append("g")                                            // position g element (parent svg object)
+        .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // ======= get remote data file =======
@@ -52,72 +52,72 @@ function initScatterGraphs() {
 
         // ======= get x/y domains (input), bind to ranges (output scale objects) =======
         x.domain([0, d3.max(dataSet, function(d) {
-            return d.cx + 10;            // get x location from data object
+            return d.cx + 10;
         })])
         y.domain([0, d3.max(dataSet, function(d) {
-            return d.cy + 10;            // get y location from data object
+            return d.cy + 10;
         })])
 
         // ======= X scale =======
-        svg.append("g")                 // new "g" element contains scale produced by xAxis object methods
-            .attr("class", "x axis")    // "x" and "axis" classes for general and specific styles
+        svg.append("g")
+            .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);               // calls xAxis methods to create scale
+            .call(xAxis);
 
         // ======= Y scale (with title) =======
-        svg.append("g")                 // new "g" element contains scale produced by yAxis object methods
-            .attr("class", "y axis")    // "y" and "axis" classes for general and specific styles
-            .call(yAxis)                // calls yAxis methods to create scale
-            .append("text")                         // append "Frequency" scale label to scale
-                .attr("transform", "rotate(-90)")   // rotate label to fit
-                .attr("x", -180)                      // x location of label (moves on y axis due to rotation)
-                .attr("y", -50)                      // y location of label (moves on x axis due to rotation)
-                .attr("dy", ".71em")                // location tweak
-                .style("text-anchor", "end")        // position based on end of text string (vs start of text)
-                .text("animals")                 // text content ("Frequency")
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -180)
+                .attr("y", -50)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("animals")
                 .attr("font-size", "18px")
                 .attr("fill", "steelblue");
 
         // ======= drop shadows =======
-        var defs = svg.append("defs");          // filters go in defs element
-        var filterA = defs.append("filter")      // create filter with id #drop-shadow
+        var defs = svg.append("defs");
+        var filterA = defs.append("filter")
             .attr("id", "drop-shadowA")
-            .attr("width", "200%")              // > 100% prevents clipping
-            .attr("height", "130%");            // > 100% prevents clipping
+            .attr("width", "200%")
+            .attr("height", "130%");
         filterA.append("feGaussianBlur")
-            .attr("in", "SourceAlpha")          // opacity of filterA targert element (rect)
-            .attr("stdDeviation", 2)            // amount of blur
-            .attr("result", "blur");            // calculations stored in blur attribute
-        filterA.append("feOffset")               // translate blur output to right and down
+            .attr("in", "SourceAlpha")
+            .attr("stdDeviation", 2)
+            .attr("result", "blur");
+        filterA.append("feOffset")
             .attr("in", "blur")
             .attr("dx", 3)
             .attr("dy", 3)
-            .attr("result", "offsetBlur");      // calculations stored in offsetBlur attribute
-        var feMergeA = filterA.append("feMerge"); // SourceGraphic overlaid on blur
+            .attr("result", "offsetBlur");
+        var feMergeA = filterA.append("feMerge");
         feMergeA.append("feMergeNode")
             .attr("in", "offsetBlur")
         feMergeA.append("feMergeNode")
-            .attr("in", "SourceGraphic");       // SourceGraphic appended last (top layer)
+            .attr("in", "SourceGraphic");
 
-        var filterB = defs.append("filter")      // create filter with id #drop-shadow
+        var filterB = defs.append("filter")
             .attr("id", "drop-shadowB")
-            .attr("width", "200%")              // > 100% prevents clipping
-            .attr("height", "130%");            // > 100% prevents clipping
+            .attr("width", "200%")
+            .attr("height", "130%");
         filterB.append("feGaussianBlur")
-            .attr("in", "SourceAlpha")          // opacity of filterB targert element (rect)
-            .attr("stdDeviation", 1)            // amount of blur
-            .attr("result", "blur");            // calculations stored in blur attribute
-        filterB.append("feOffset")               // translate blur output to right and down
+            .attr("in", "SourceAlpha")
+            .attr("stdDeviation", 1)
+            .attr("result", "blur");
+        filterB.append("feOffset")
             .attr("in", "blur")
             .attr("dx", 1)
             .attr("dy", 1)
-            .attr("result", "offsetBlur");      // calculations stored in offsetBlur attribute
-        var feMergeB = filterB.append("feMerge"); // SourceGraphic overlaid on blur
+            .attr("result", "offsetBlur");
+        var feMergeB = filterB.append("feMerge");
 
         feMergeB.append("feMergeNode")
             .attr("in", "offsetBlur")
         feMergeB.append("feMergeNode")
-            .attr("in", "SourceGraphic");       // SourceGraphic appended last (top layer)
+            .attr("in", "SourceGraphic");
 
         // ======= add bars for each data point =======
         var rectGroup = svg.selectAll("rect")
@@ -162,7 +162,7 @@ function initScatterGraphs() {
 
         // ======= interactivity =======
         rectGroup.on("mouseover", function() {
-            console.log("mouseover");
+            // console.log("mouseover");
             rectColor = d3.select(this).style("fill");
             rectX = parseInt(d3.select(this).attr("x"));
             rectY = parseInt(d3.select(this).attr("y"));
@@ -177,13 +177,13 @@ function initScatterGraphs() {
             d3.select(this).style('fill', "black");
         })
         rectGroup.on("mouseout", function() {
-            console.log("mouseout");
+            // console.log("mouseout");
             d3.select(this).style('fill', rectColor);
             d3.select(this).style("filter", "url(#drop-shadowA)");
             displayTooltips("", null, null, "hide");
         })
         rectGroup.on("mousedown", function() {
-            console.log("mousedown");
+            // console.log("mousedown");
             d3.select(this).style('fill', "red");
             d3.select(this).style("filter", "url(#drop-shadowB)")
             d3.select(this).transition()
@@ -193,7 +193,7 @@ function initScatterGraphs() {
         })
         document.addEventListener("mouseup", myFunction);
         function myFunction() {
-            console.log("mouseup");
+            // console.log("mouseup");
             if (whichRect) {
                 whichRect.style('fill', rectColor);
                 whichRect.style("filter", "url(#drop-shadowA)")
