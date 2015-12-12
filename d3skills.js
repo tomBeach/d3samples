@@ -14,8 +14,6 @@ function initScatterGraphs() {
         width = 720 - chartPadding.left - chartPadding.right,
         height = 500 - chartPadding.top - chartPadding.bottom;
     var messageLoc = $("#messageArea").offset();
-    console.log("  messageLoc.left: " + messageLoc.left);
-    console.log("  messageLoc.top: " + messageLoc.top);
 
     // ======= scale mapping (data to display) =======
     var xScale = d3.scale.linear()
@@ -264,6 +262,125 @@ function initScatterGraphs() {
     }
 }
 
+// ======= ======= ======= initSkillsChart ======= ======= =======
+function initSkillsChart() {
+    console.log("initSkillsChart");
+
+    // == data, labels, colors (10 data items)
+    var experience = [22,20,22,10,16,15,13,10,8,12];
+    var skills = ['','javascript  ','jquery  ','html/css  ','bootstrap  ','rails  ','ruby  ','postgres  ','node/express  ','sequelize  ','d3'];
+    var colors = ['#6666ff','#9999ff','#00ace6','#4dd2ff','#3385ff','#66a3ff','#99c2ff','#66cc99','#00cccc','#ff9966'];
+
+    // == set position of vertical grid lines
+    var grid = d3.range(6).map(function(i){
+        return {'x1':0, 'y1':30, 'x2':400, 'y2':300};
+    });
+
+    // == X scale numbers (1 * 5 = every 5th number)
+    var tickVals = grid.map(function(d,i){
+        if ((i > 0) && (i < 25)) {
+            return i * 5;
+        } else if(i === 0){
+            return "0";
+        }
+    });
+
+    // == axis and color scales
+    var xScale = d3.scale.linear()
+        .domain([0, 25])
+        .range([0, 400]);
+    var yScale = d3.scale.linear()
+        .domain([0, skills.length])
+        .range([50, 300]);
+    var colorScale = d3.scale.quantize()
+        .domain([0, skills.length])
+        .range(colors);
+
+    // ======= build svg object =======
+    var barChart = d3.select('#skillsGraph')
+        .append('svg')
+        .attr({'width':500, 'height':400});
+
+    // == make vertical grid lines
+    var grids = barChart.append('g')
+        .attr('id', 'grid')
+        .attr('transform', 'translate(100, 20)')        // translate from left, from top
+        .selectAll('line')
+        .data(grid)                                     // set of x axis labels (0 - 25)
+        .enter()
+        .append('line')
+        .attr({
+            'x1': function(d,i) { return i * 80; },     // tick line top spacing
+            'x2': function(d,i) { return i * 80; },     // tick line bottom spacing
+            'y1': function(d)   { return d.y1; },
+            'y2': function(d)   { return d.y2; },
+        })
+        .style({'stroke':'#adadad','stroke-width':'1px'});
+
+    // == x axis labels
+    var	xAxis = d3.svg.axis();
+        xAxis
+            .orient('bottom')
+            .scale(xScale)
+            .tickValues(tickVals);
+
+    // == y axis labels
+    var	yAxis = d3.svg.axis();
+        yAxis
+            .orient('left')
+            .scale(yScale)
+            .tickSize(2)
+            .tickFormat(function(d,i){ return skills[i]; })
+            .tickValues(d3.range(17));
+
+    // positoining of Y_xis: translate(locX of Y_xis, locY top of Y_xis )
+    var y_xis = barChart.append('g')
+        .attr("transform", "translate(100, 0)")
+        .attr('id','yaxis')
+        .call(yAxis);
+
+    // positoining of X_xis: translate(locX of X_xis, locY top of X_xis )
+    var x_xis = barChart.append('g')
+        .attr("transform", "translate(98, 300)")
+        .attr('id','xaxis')
+        .call(xAxis);
+
+    // == color bars (colored rect graph elements)
+    var chart = barChart.append('g')
+        .attr("transform", "translate(100, 0)")
+        .attr('class','bars')
+        .selectAll('rect')
+        .data(experience)
+        .enter()
+        .append('rect')
+            .attr('height', 20)
+            .attr('x', 5)
+            .attr('y', function(d, i) { return yScale(i) + 15; })
+            .attr('width', function(d) {
+                return xScale(d);
+            })
+            .style('fill', function(d, i) { return colorScale(i); });
+
+    // == text labels for each bar
+    var transitext = d3.select('.bars')
+        .attr("transform", "translate(100, 0)")
+        .selectAll('text')
+        .data(experience)
+        .enter()
+        .append('text')
+            .attr('x', function(d) { return xScale(d) + 10; })   // x location offset for labels
+            .attr('y', function(d,i) { return yScale(i) + 30; })    // y location offset for labels
+            .text(function(d){ return d; }).style({'fill':'red', 'font-size':'14px'});  // label text
+
+    // == animate bar growth (500ms transition)
+    var transit = d3.select("svg").selectAll("rect")
+        .data(experience)
+        .transition()
+        .duration(1000)
+        .attr("width", function(d) {return xScale(d); });
+
+}
+
 // ======= ======= ======= initLineGraph2 ======= ======= =======
 function initLineGraph2() {
     console.log("initLineGraph2");
@@ -280,7 +397,6 @@ function initLineGraph2() {
     var chartPadding = {top: 10, right: 60, bottom: 60, left: 60};
     var width = 720;
     var height = 500;
-    console.log("  width: " + width);
 
     // ======= scales =======
     var xScale = d3.scale.linear()
@@ -728,130 +844,5 @@ function initDivChart() {
             .style("height", function(d) { return barH + "px"; })           // set bar height as multiple of associated data value (d)
             .text(function(d) { return d; })                                // set the text content of each bar (produces a label)
             .style({'color':'white', 'font-size':'10px'});                  // text color for labels ('color' for divs, 'fill' for svgs)
-
-}
-
-// ======= ======= ======= initSkillsChart ======= ======= =======
-function initSkillsChart() {
-    console.log("initSkillsChart");
-
-    // == data, labels, colors (10 data items)
-    var experience = [22,20,22,10,14,12,10,8,12,6];
-    var skills = ['', 'javascript  ', 'jquery  ', 'html/css  ', 'bootstrap  ', 'rails  ', 'ruby  ', 'node/express  ', 'sequelize  ', 'postgres  ', 'd3'];
-    var colors = ['#0000b4','#0094ff','#0d4bcf','#0066AE','#285964','#405F83','#0283AF','#79BCBF','#99C19E','#99C16E'];
-
-    // == set position of vertical grid lines
-    var grid = d3.range(6).map(function(i){
-        return {'x1':0, 'y1':30, 'x2':400, 'y2':300};
-    });
-
-    // == X scale numbers (1 * 5 = every 5th number)
-    var tickVals = grid.map(function(d,i){
-        if ((i > 0) && (i < 25)) {
-            return i * 5;
-        } else if(i === 0){
-            return "0";
-        }
-    });
-
-    // == axis and color scales
-    var xScale = d3.scale.linear()
-        .domain([0, 25])
-        .range([0, 400]);
-    var yScale = d3.scale.linear()
-        .domain([0, skills.length])
-        .range([50, 300]);
-    var colorScale = d3.scale.quantize()
-        .domain([0, skills.length])
-        .range(colors);
-
-    // var xScale = d3.scale.linear()
-    //     .domain([0, d3.max(experience, function(d) { return d.value; })])
-    //     .range([0, 400]);
-
-
-    // ======= build svg object =======
-    var barChart = d3.select('#skillsGraph')
-        .append('svg')
-        .attr({'width':500, 'height':400});
-
-    // == make vertical grid lines
-    var grids = barChart.append('g')
-        .attr('id', 'grid')
-        .attr('transform', 'translate(100, 20)')        // translate from left, from top
-        .selectAll('line')
-        .data(grid)                                     // set of x axis labels (0 - 25)
-        .enter()
-        .append('line')
-        .attr({
-            'x1': function(d,i) { return i * 80; },     // tick line top spacing
-            'x2': function(d,i) { return i * 80; },     // tick line bottom spacing
-            'y1': function(d)   { return d.y1; },
-            'y2': function(d)   { return d.y2; },
-        })
-        .style({'stroke':'#adadad','stroke-width':'1px'});
-
-    // == x axis labels
-    var	xAxis = d3.svg.axis();
-        xAxis
-            .orient('bottom')
-            .scale(xScale)
-            .tickValues(tickVals);
-
-    // == y axis labels
-    var	yAxis = d3.svg.axis();
-        yAxis
-            .orient('left')
-            .scale(yScale)
-            .tickSize(2)
-            .tickFormat(function(d,i){ return skills[i]; })
-            .tickValues(d3.range(17));
-
-    // positoining of Y_xis: translate(locX of Y_xis, locY top of Y_xis )
-    var y_xis = barChart.append('g')
-        .attr("transform", "translate(100, 0)")
-        .attr('id','yaxis')
-        .call(yAxis);
-
-    // positoining of X_xis: translate(locX of X_xis, locY top of X_xis )
-    var x_xis = barChart.append('g')
-        .attr("transform", "translate(98, 300)")
-        .attr('id','xaxis')
-        .call(xAxis);
-
-    // == color bars (colored rect graph elements)
-    var chart = barChart.append('g')
-        .attr("transform", "translate(100, 0)")
-        .attr('class','bars')
-        .selectAll('rect')
-        .data(experience)
-        .enter()
-        .append('rect')
-            .attr('height', 20)
-            .attr('x', 5)
-            .attr('y', function(d, i) { return yScale(i) + 15; })
-            .attr('width', function(d) {
-                return xScale(d);
-            })
-            .style('fill', function(d, i) { return colorScale(i); });
-
-    // == text labels for each bar
-    var transitext = d3.select('.bars')
-        .attr("transform", "translate(100, 0)")
-        .selectAll('text')
-        .data(experience)
-        .enter()
-        .append('text')
-            .attr('x', function(d) { return xScale(d) + 10; })   // x location offset for labels
-            .attr('y', function(d,i) { return yScale(i) + 30; })    // y location offset for labels
-            .text(function(d){ return d; }).style({'fill':'red', 'font-size':'14px'});  // label text
-
-    // == animate bar growth (500ms transition)
-    var transit = d3.select("svg").selectAll("rect")
-        .data(experience)
-        .transition()
-        .duration(1000)
-        .attr("width", function(d) {return xScale(d); });
-
 
 }
