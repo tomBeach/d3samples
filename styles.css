@@ -46,10 +46,11 @@ body {
 
 /* ======= rows ======= */
 .header > .column {
-  height: 80px;
-}
-.navbar1 > .column {
-  height: 40px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 .content > .column {
   height: auto;
@@ -65,6 +66,13 @@ body {
 h1 {
     color: rebeccapurple;
 }
+.intro {
+    width: 70%;
+    text-align: center;
+}
+.title {
+    text-align: center;
+}
 .section {
     margin: 0 20px 10px 20px;
     background-color: #ffe6cc;
@@ -72,6 +80,7 @@ h1 {
 .sectionTitle {
     margin: 20px 20px 0 20px;
     padding: 2px;
+    text-align: center;
     background-color: #DAA520;
 }
 
@@ -88,15 +97,24 @@ h1 {
     font: 10px sans-serif;
     text-anchor: end;
 }
-
-#chartManual, #chartDiv, #chartSvg, #chartRemote, #chartHorizontal, #scatterPlot {
-    /*margin-top: 10px;*/
+#chartManual, #chartDiv, #chartSvg, #chartRemote, #chartHorizontal, #scatterPlot, #lineGraph2 {
+    margin: 0 20px 10px 20px;
     padding: 10px;
-    /*border: 1px solid rebeccapurple;*/
+    border: 1px solid rebeccapurple;
 }
-/*.3Dbar:hover {
-  fill: #ace63c;
-}*/
 g.hover {
     background-color: rgba(0, 0, 0, .5);
 }
+.axis path {
+    fill: none;
+    stroke: #777;
+    shape-rendering: crispEdges;
+}
+.axis text {
+    font-family:"Ariel", sans-serif;
+    font-size: 13px;
+}
+
+/*.skillBars {
+
+}*/

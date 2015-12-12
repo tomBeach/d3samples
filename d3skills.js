@@ -6,55 +6,59 @@ function initScatterGraphs() {
     // ======= data granularity =======
     var barOuterPad = .2;
     var barPad = .1;
-    var colors = ['red','green','gray','blue','olive','lawngreen','purple','while','tomato','yellow'];
-    var tooltips = ['red','green','gray','blue','olive','lawngreen','purple','while','tomato','yellow'];
+    var colors = ['red','green','gray','blue','olive','lawngreen','purple','cornflowerblue','orange'];
+    var tooltips = ['canine','feline','feline','feline','feline','canine','canine','reptile','primate'];
 
     // ======= chart formatting =======
-    var margin = {top: 20, right: 20, bottom: 30, left: 60},
-        width = 720 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    var chartPadding = {top: 20, right: 20, bottom: 30, left: 60},
+        width = 720 - chartPadding.left - chartPadding.right,
+        height = 500 - chartPadding.top - chartPadding.bottom;
+    var messageLoc = $("#messageArea").offset();
+    console.log("  messageLoc.left: " + messageLoc.left);
+    console.log("  messageLoc.top: " + messageLoc.top);
 
     // ======= scale mapping (data to display) =======
-    var label = d3.scale.ordinal()
-        .rangeRoundBands([0, width], barPad, barOuterPad);
-    var x = d3.scale.linear()
+    var xScale = d3.scale.linear()
         .range([0, width]);
-    var y = d3.scale.linear()
+    var yScale = d3.scale.linear()
         .range([height, 0]);
+    var labelScale = d3.scale.ordinal()
+        .rangeRoundBands([0, width], barPad, barOuterPad);
     var colorScale = d3.scale.quantize()
-                    .domain([0, colors.length])
-                    .range(colors);
+        .domain([0, colors.length])
+        .range(colors);
 
-    // ======= scale label formating =======
+    // ======= axis formating =======
     var labelAxis = d3.svg.axis()
-        .scale(label)
+        .scale(labelScale)
         .orient("bottom");
     var xAxis = d3.svg.axis()
-        .scale(x)
+        .scale(xScale)
         .orient("bottom");
     var yAxis = d3.svg.axis()
-        .scale(y)
+        .scale(yScale)
         .orient("left")
         .ticks(5);
 
     // ======= build svg objects =======
     var svg = d3.select("#scatterGraphs")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + chartPadding.left + chartPadding.right)
+        .attr("height", height + chartPadding.top + chartPadding.bottom)
         .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + chartPadding.left + "," + chartPadding.top + ")");
 
     // ======= get remote data file =======
     d3.tsv("data3.tsv", stringToInt, function(error, dataSet) {
         if (error) throw error;
 
-        var rectColor, rectX, rectY, rectW, rectH, whichRect;
+        var rectColor, rectElement, rectX, rectY, rectXstyle, rectYstyle, rectW, rectH;
+        var tooltipIndex, nextTooltip;
 
-        // ======= get x/y domains (input), bind to ranges (output scale objects) =======
-        x.domain([0, d3.max(dataSet, function(d) {
+        // ======= get x/y domains, bind to ranges =======
+        xScale.domain([0, d3.max(dataSet, function(d) {
             return d.cx + 10;
         })])
-        y.domain([0, d3.max(dataSet, function(d) {
+        yScale.domain([0, d3.max(dataSet, function(d) {
             return d.cy + 10;
         })])
 
@@ -78,7 +82,7 @@ function initScatterGraphs() {
                 .attr("font-size", "18px")
                 .attr("fill", "steelblue");
 
-        // ======= drop shadows =======
+        // ======= heavy drop shadow (filterA) =======
         var defs = svg.append("defs");
         var filterA = defs.append("filter")
             .attr("id", "drop-shadowA")
@@ -99,6 +103,7 @@ function initScatterGraphs() {
         feMergeA.append("feMergeNode")
             .attr("in", "SourceGraphic");
 
+        // ======= light drop shadow (filterB) =======
         var filterB = defs.append("filter")
             .attr("id", "drop-shadowB")
             .attr("width", "200%")
@@ -124,17 +129,19 @@ function initScatterGraphs() {
            .data(dataSet)
            .enter()
                 .append("rect")
+                .attr("id", function(d, i) {
+                    return d.animal + "_" + i;
+                })
                 .attr("class", "3Dbar")
-                .attr("width", 10)
+                .attr("width", 30)
                 .attr("height", function(d) {
                     return d.cr * 4;
                 })
                 .attr("x", function(d) {
-                    console.log("  d.cx: " + d.cx);
                     return d.cx + 20;
                 })
                 .attr("y", function(d) {
-                    return height - y(d.cy)/1.2 - 40;
+                    return height - yScale(d.cy)/1.2 - 40;
                 })
                 .attr("stroke-width", 2)
                 .style("filter", "url(#drop-shadowA)")
@@ -146,41 +153,60 @@ function initScatterGraphs() {
             .enter()
                 .append("text")
                     .text(function(d) {
-                        console.log("  d.animal: " + d.animal);
+                        // console.log("  d.animal: " + d.animal);
                         return d.animal;
                     })
                     .attr("x", function(d) {
-                        console.log("  d.cx: " + d.cx);
-                        return d.cx + 28;
+                        // console.log("  d.cx: " + d.cx);
+                        return d.cx + 30;
                     })
                     .attr("y", function(d) {
-                        return height - y(d.cy)/1.2 - 44;
+                        return height - yScale(d.cy)/1.2 - 46;
                     })
                     .attr("font-family", "sans-serif")
                     .attr("font-size", "14px")
                     .attr("fill", "steelblue");
 
         // ======= interactivity =======
+        $("#scatterGraphs").on("mouseover", function() {
+            // console.log("mouseover_graph");
+            locX = parseInt(messageLoc.left + 20);
+            locY = parseInt(messageLoc.top + 8);
+            displayTooltips("#message", "click and hold over bar to animate", locX + "px", locY + "px", "show");
+        })
+        $("#scatterGraphs").on("mouseout", function() {
+            // console.log("mouseout_graph");
+            displayTooltips("#message", "", null, null, "hide");
+        })
+
         rectGroup.on("mouseover", function() {
-            // console.log("mouseover");
+            // console.log("mouseover_rect");
+
+            // == start properties stored for return-to-normal state
             rectColor = d3.select(this).style("fill");
+            rectElement = d3.select(this);
+            rectH = d3.select(this).attr("height");
+
+            // == position data for tootips
             rectX = parseInt(d3.select(this).attr("x"));
             rectY = parseInt(d3.select(this).attr("y"));
-            rectXstyle = rectX + 220;
-            rectYstyle = rectY + 170;
+            rectXstyle = rectX + 266;
+            rectYstyle = rectY + 220;
             rectXstyle = rectXstyle + "px";
             rectYstyle = rectYstyle + "px";
-            rectH = d3.select(this).attr("height");
-            whichRect = d3.select(this);
-            nextTooltip = "<div id='tooltipText'>Some appended text</div>";
-            displayTooltips(nextTooltip, rectXstyle, rectYstyle, "show");
+
+            // == build tooltip string
+            tooltipText = d3.select(this).attr('id').split("_")[0];
+            tooltipIndex = (d3.select(this).attr('id')).charAt(d3.select(this).attr('id').length - 1);
+            nextTooltip = "<div id='tooltipText'>" + tooltipText +  "'s order is " + tooltips[tooltipIndex] + "</div>";
+            displayTooltips("#tooltips", nextTooltip, rectXstyle, rectYstyle, "show");
             d3.select(this).style('fill', "black");
         })
         rectGroup.on("mouseout", function() {
             // console.log("mouseout");
             d3.select(this).style('fill', rectColor);
             d3.select(this).style("filter", "url(#drop-shadowA)");
-            displayTooltips("", null, null, "hide");
+            displayTooltips("#tooltips", "", null, null, "hide");
         })
         rectGroup.on("mousedown", function() {
             // console.log("mousedown");
@@ -194,11 +220,11 @@ function initScatterGraphs() {
         document.addEventListener("mouseup", myFunction);
         function myFunction() {
             // console.log("mouseup");
-            if (whichRect) {
-                whichRect.style('fill', rectColor);
-                whichRect.style("filter", "url(#drop-shadowA)")
-                whichRect.text("");
-                whichRect.transition()
+            if (rectElement) {
+                rectElement.style('fill', rectColor);
+                rectElement.style("filter", "url(#drop-shadowA)")
+                rectElement.text("");
+                rectElement.transition()
                     .attr("height", rectH)        // will make it bigger
                     .attr("y", rectY)
                     .duration(400);
@@ -208,24 +234,24 @@ function initScatterGraphs() {
     });
 
     // ======= displayTooltips =======
-    function displayTooltips(whichTooltip, rectX, rectY, showHide) {
+    function displayTooltips(whichInfo, whichTooltip, rectX, rectY, showHide) {
         // console.log("displayTooltips");
         if (showHide == "show") {
-            $("#tooltips").css("visibility", "visible");
-            $("#tooltips").css("position", "absolute");
-            $("#tooltips").css("z-index", 9);
-            $("#tooltips").css("left", rectX);
-            $("#tooltips").css("top", rectY);
-            $("#tooltips").css("color", "red");
-            $("#tooltips").css("padding", "10px");
-            $("#tooltips").css("border", "solid 1px black");
-            $("#tooltips").css("background", "rgba(255, 255, 255, 0.5)");
-            $("#tooltips").html(whichTooltip);
+            $(whichInfo).css("visibility", "visible");
+            $(whichInfo).css("position", "absolute");
+            $(whichInfo).css("z-index", 9);
+            $(whichInfo).css("left", rectX);
+            $(whichInfo).css("top", rectY);
+            $(whichInfo).css("color", "red");
+            $(whichInfo).css("padding", "10px");
+            $(whichInfo).css("border", "solid 1px black");
+            $(whichInfo).css("background", "rgba(255, 255, 255, 0.7)");
+            $(whichInfo).html(whichTooltip);
         } else {
-            $("#tooltips").css("visibility", "invisible");
-            $("#tooltips").css("background", "");
-            $("#tooltips").css("border", "");
-            $("#tooltips").html("");
+            $(whichInfo).css("visibility", "invisible");
+            $(whichInfo).css("background", "");
+            $(whichInfo).css("border", "");
+            $(whichInfo).html("");
         }
     }
 
@@ -238,6 +264,141 @@ function initScatterGraphs() {
     }
 }
 
+// ======= ======= ======= initLineGraph2 ======= ======= =======
+function initLineGraph2() {
+    console.log("initLineGraph2");
+
+    var dataSet = [
+        {"sale": "202", "year": "2000"},
+        {"sale": "215", "year": "2002"},
+        {"sale": "179", "year": "2004"},
+        {"sale": "199", "year": "2006"},
+        {"sale": "134", "year": "2008"},
+        {"sale": "176", "year": "2010"}];
+
+    // ======= chart formatting =======
+    var chartPadding = {top: 10, right: 60, bottom: 60, left: 60};
+    var width = 720;
+    var height = 500;
+    console.log("  width: " + width);
+
+    // ======= scales =======
+    var xScale = d3.scale.linear()
+        .domain([
+            d3.min(dataSet, function(d) {
+                return d.year;
+            }),
+            d3.max(dataSet, function(d) {
+                return d.year;
+            })])
+        .range([0, width - (chartPadding.left + chartPadding.right)]);
+
+    var yScale = d3.scale.linear()
+        .domain([
+            d3.min(dataSet, function(d) {
+                return d.sale;
+            }),
+            d3.max(dataSet, function(d) {
+                return d.sale;
+            })])
+        .range([height - (chartPadding.top + chartPadding.bottom), 0]);
+
+    // ======= svg canvas =======
+    var svgCanvas = d3.select("#lineGraph2")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+            .attr("transform", "translate(" + chartPadding.left + "," + chartPadding.top + ")");
+
+
+    // ======= axes =======
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(10);
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(6);
+
+    // ======= X scale =======
+    svgCanvas.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0, " + parseInt(height - chartPadding.bottom) + ")")
+        .call(xAxis);
+
+    // ======= Y scale (with title) =======
+    svgCanvas.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(0, 10)")
+        .call(yAxis)
+        .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -180)
+            .attr("y", -50)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("sales")
+            .attr("font-size", "18px")
+            .attr("fill", "steelblue");
+
+    var lineGen = d3.svg.line()
+        .x(function(d) {
+            // console.log("  d.year: " + d.year);
+            return xScale(d.year);
+        })
+        .y(function(d) {
+            // console.log("  d.sale: " + d.sale);
+            return yScale(d.sale);
+        })
+        .interpolate("basis");
+
+    svgCanvas.append('svg:path')
+        .attr('d', lineGen(dataSet))
+        .attr('stroke', 'green')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none');
+}
+
+// ======= ======= ======= initLineGraph ======= ======= =======
+function initLineGraph() {
+    console.log("initLineGraph");
+
+    var w = 900;
+    var h = 400;
+    var nodes = [
+        {x: 30, y: 50},
+        {x: 50, y: 80},
+        {x: 90, y: 120}];
+    var links = [
+        {source: nodes[0], target: nodes[1]},
+        {source: nodes[2], target: nodes[1]}];
+
+    var svg = d3.select("#lineGraph1")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+    svg.selectAll("circle.nodes")
+       .data(nodes)
+       .enter()
+            .append("svg:circle")
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; })
+            .attr("r", "2px")
+            .attr("fill", "red");
+
+    svg.selectAll(".line")
+        .data(links)
+        .enter()
+            .append("line")
+            .attr("x1", function(d) { return d.source.x })
+            .attr("y1", function(d) { return d.source.y })
+            .attr("x2", function(d) { return d.target.x })
+            .attr("y2", function(d) { return d.target.y })
+            .style("stroke", "rgb(6,120,155)");
+}
+
 // ======= ======= ======= initScatterPlot ======= ======= =======
 function initScatterPlot() {
     console.log("initScatterPlot");
@@ -248,39 +409,39 @@ function initScatterPlot() {
     var colors = ['#0000b4','#0094ff','#0d4bcf','#0066AE','#285964','#405F83','#0283AF','#79BCBF','#99C19E','#99C16E'];
 
     // ======= chart formatting =======
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 720 - margin.left - margin.right,       // outer width of chart
-        height = 300 - margin.top - margin.bottom;      // outer height of chart
+    var chartPadding = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 720 - chartPadding.left - chartPadding.right,       // outer width of chart
+        height = 300 - chartPadding.top - chartPadding.bottom;      // outer height of chart
 
     // ======= scale mapping (data to display) =======
-    var label = d3.scale.ordinal()              // function that sorts data alphabetically
+    var labelScale = d3.scale.ordinal()              // function that sorts data alphabetically
         .rangeRoundBands([0, width], barPad, barOuterPad);
     var x = d3.scale.linear()               // function that maps data domain (below) to output range
         .range([0, width]);                 // fits max data value into max chart width
     var y = d3.scale.linear()               // function that maps data domain (below) to output range
         .range([height, 0]);                // fits max data value into max chart height
     var colorScale = d3.scale.quantize()
-                    .domain([0, colors.length])
-                    .range(colors);
+        .domain([0, colors.length])
+        .range(colors);
 
     // ======= scale label formating =======
     var labelAxis = d3.svg.axis()   // existing x scale function is bound to xAxis
-        .scale(label)               // x scale becomes scale function of xAxis object
-        .orient("bottom");      // specifies location of axis (top/bottom/left/right)
-    var xAxis = d3.svg.axis()   // existing x scale function is bound to xAxis
-        .scale(x)               // x scale becomes scale function of xAxis object
-        .orient("bottom");      // specifies location of axis (top/bottom/left/right)
+        .scale(labelScale)          // x scale becomes scale function of xAxis object
+        .orient("bottom");          // specifies location of axis (top/bottom/left/right)
+    var xAxis = d3.svg.axis()       // existing x scale function is bound to xAxis
+        .scale(x)                   // x scale becomes scale function of xAxis object
+        .orient("bottom");          // specifies location of axis (top/bottom/left/right)
     var yAxis = d3.svg.axis()
-        .scale(y)               // existing y scale function is bound to yAxis as yAxis function
-        .orient("left")         // specifies location of axis (top/bottom/left/right)
-        .ticks(5);              // number of ticks (axis labels)
+        .scale(y)                   // existing y scale function is bound to yAxis as yAxis function
+        .orient("left")             // specifies location of axis (top/bottom/left/right)
+        .ticks(5);                  // number of ticks (axis labels)
 
     // ======= build svg objects =======
     var svg = d3.select("#scatterPlot").append("svg")       // create and append svg element to container
-        .attr("width", width + margin.left + margin.right)      // offset chart top/left/right/bottom by margin dimensions
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + chartPadding.left + chartPadding.right)      // offset chart top/left/right/bottom by chartPadding dimensions
+        .attr("height", height + chartPadding.top + chartPadding.bottom)
         .append("g")                                            // position g element (parent svg object)
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + chartPadding.left + "," + chartPadding.top + ")");
 
     // ======= get remote data file =======
     d3.tsv("data3.tsv", stringToInt, function(error, dataSet) {
@@ -333,11 +494,9 @@ function initScatterPlot() {
             .enter()
                 .append("text")
                     .text(function(d) {
-                        console.log("  d.animal: " + d.animal);
                         return d.animal;
                     })
                     .attr("x", function(d) {
-                        console.log("  d.cx: " + d.cx);
                         return d.cx + 20;
                     })
                     .attr("y", function(d) {
@@ -346,20 +505,6 @@ function initScatterPlot() {
                     .attr("font-family", "sans-serif")
                     .attr("font-size", "14px")
                     .attr("fill", "red");
-
-        // svg.selectAll("rect")
-        //    .data(dataSet)
-        //    .enter()
-        //         .append("rect")
-        //         .attr("width", 10)
-        //         .attr("height", 10)
-        //         .attr("x", function(d) {
-        //             console.log("  d.cx: " + d.cx);
-        //             return d.cx + 20;
-        //         })
-        //         .attr("y", function(d) {
-        //             return height - y(d.cy) + 20;
-        //         });
 
     });
 
@@ -386,9 +531,9 @@ function initHorizontalChart() {
     var vowels = ["A", "E", "I", "O", "U"];
 
     // ======= chart formatting =======
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 720 - margin.left - margin.right,       // outer width of chart
-        height = 500 - margin.top - margin.bottom;      // outer height of chart
+    var chartPadding = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 720 - chartPadding.left - chartPadding.right,       // outer width of chart
+        height = 500 - chartPadding.top - chartPadding.bottom;      // outer height of chart
 
     // ======= scale mapping (data to display) =======
     var x = d3.scale.ordinal()              // function that sorts data alphabetically
@@ -409,10 +554,10 @@ function initHorizontalChart() {
 
     // ======= build svg objects =======
     var svg = d3.select("#chartHorizontal").append("svg")       // create and append svg element to container
-        .attr("width", width + margin.left + margin.right)      // offset chart top/left/right/bottom by margin dimensions
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + chartPadding.left + chartPadding.right)      // offset chart top/left/right/bottom by chartPadding dimensions
+        .attr("height", height + chartPadding.top + chartPadding.bottom)
         .append("g")                                            // g element is parent svg object
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + chartPadding.left + "," + chartPadding.top + ")");
 
     // ======= get remote data file =======
     d3.tsv("data2.tsv", stringToInt, function(error, dataSet) {
@@ -482,8 +627,8 @@ function initRemoteChart() {
     d3.tsv("data.tsv", stringToInt, function(error, dataSet) {
         console.log("callbackFunction");
 
-        var barWidths = d3.scale.linear()               // function that returns range values mapped to domain values
-            .domain([0, d3.max(dataSet, function(d) { return d.value; })])  // function used to extract values from dataSet objects
+        var barWidths = d3.scale.linear()
+            .domain([0, d3.max(dataSet, function(d) { return d.value; })])
             .range([0, width]);
 
         chart.attr("height", barHeight * dataSet.length);
@@ -584,14 +729,7 @@ function initDivChart() {
             .text(function(d) { return d; })                                // set the text content of each bar (produces a label)
             .style({'color':'white', 'font-size':'10px'});                  // text color for labels ('color' for divs, 'fill' for svgs)
 
-    // console.log("  d3.max(dataSet): " + d3.max(dataSet));
-    // console.log("  xScale.domain: " + xScale.domain());
-    // console.log("  xScale.range: " + xScale.range());
-
 }
-
-
-
 
 // ======= ======= ======= initSkillsChart ======= ======= =======
 function initSkillsChart() {
@@ -603,13 +741,8 @@ function initSkillsChart() {
     var colors = ['#0000b4','#0094ff','#0d4bcf','#0066AE','#285964','#405F83','#0283AF','#79BCBF','#99C19E','#99C16E'];
 
     // == set position of vertical grid lines
-    // x1: ???
-    // x2: ???
-    // y2: bottom of grid
-    // y1: top of grid
-    // d3.range(6): number of xScale values
     var grid = d3.range(6).map(function(i){
-        return {'x1':0, 'y1':30, 'x2':400, 'y2':280};
+        return {'x1':0, 'y1':30, 'x2':400, 'y2':300};
     });
 
     // == X scale numbers (1 * 5 = every 5th number)
@@ -621,111 +754,104 @@ function initSkillsChart() {
         }
     });
 
-    // == set size/location of graph container
-    // domain: min/max data values (min, max)
-    // range: xAxis size (start, end)
-    var xscale = d3.scale.linear()
-                    .domain([0, 25])
-                    .range([0, 400]);
-
-    var yscale = d3.scale.linear()
-                    .domain([0, skills.length])
-                    .range([50, 300]);
-
-    // == draw colored data bars
+    // == axis and color scales
+    var xScale = d3.scale.linear()
+        .domain([0, 25])
+        .range([0, 400]);
+    var yScale = d3.scale.linear()
+        .domain([0, skills.length])
+        .range([50, 300]);
     var colorScale = d3.scale.quantize()
-                    .domain([0, skills.length])
-                    .range(colors);
+        .domain([0, skills.length])
+        .range(colors);
 
-    // == add svg object to container
+    // var xScale = d3.scale.linear()
+    //     .domain([0, d3.max(experience, function(d) { return d.value; })])
+    //     .range([0, 400]);
+
+
+    // ======= build svg object =======
     var barChart = d3.select('#skillsGraph')
-                    .append('svg')
-                    .attr({'width':900, 'height':500});
+        .append('svg')
+        .attr({'width':500, 'height':400});
 
     // == make vertical grid lines
-    // translate(locX grid left, locY grid top):
     var grids = barChart.append('g')
-                    .attr('id', 'grid')
-                    .attr('transform', 'translate(100, 20)')        // translate from left, from top
-                    .selectAll('line')
-                    .data(grid)                                     // set of x axis labels (0 - 25)
-                    .enter()
-                    .append('line')
-                    .attr({
-                        'x1': function(d,i) { return i * 80; },     // tick line top spacing
-                        'x2': function(d,i) { return i * 80; },     // tick line bottom spacing
-                        'y1': function(d)   { return d.y1; },
-                        'y2': function(d)   { return d.y2; },
-                    })
-                    .style({'stroke':'#adadad','stroke-width':'1px'});
+        .attr('id', 'grid')
+        .attr('transform', 'translate(100, 20)')        // translate from left, from top
+        .selectAll('line')
+        .data(grid)                                     // set of x axis labels (0 - 25)
+        .enter()
+        .append('line')
+        .attr({
+            'x1': function(d,i) { return i * 80; },     // tick line top spacing
+            'x2': function(d,i) { return i * 80; },     // tick line bottom spacing
+            'y1': function(d)   { return d.y1; },
+            'y2': function(d)   { return d.y2; },
+        })
+        .style({'stroke':'#adadad','stroke-width':'1px'});
 
     // == x axis labels
     var	xAxis = d3.svg.axis();
         xAxis
             .orient('bottom')
-            .scale(xscale)
+            .scale(xScale)
             .tickValues(tickVals);
 
     // == y axis labels
     var	yAxis = d3.svg.axis();
         yAxis
             .orient('left')
-            .scale(yscale)
+            .scale(yScale)
             .tickSize(2)
             .tickFormat(function(d,i){ return skills[i]; })
             .tickValues(d3.range(17));
 
     // positoining of Y_xis: translate(locX of Y_xis, locY top of Y_xis )
     var y_xis = barChart.append('g')
-                      .attr("transform", "translate(100, 0)")
-                      .attr('id','yaxis')
-                      .call(yAxis);
+        .attr("transform", "translate(100, 0)")
+        .attr('id','yaxis')
+        .call(yAxis);
 
     // positoining of X_xis: translate(locX of X_xis, locY top of X_xis )
     var x_xis = barChart.append('g')
-                      .attr("transform", "translate(98, 300)")
-                      .attr('id','xaxis')
-                      .call(xAxis);
+        .attr("transform", "translate(98, 300)")
+        .attr('id','xaxis')
+        .call(xAxis);
 
     // == color bars (colored rect graph elements)
-    // translate: translate(locX bars left, locY bars top):
-    // attr('height', 20): each bar 20px high
     var chart = barChart.append('g')
-                        .attr("transform", "translate(100, 0)")
-                        .attr('id','bars')
-                        .selectAll('rect')
-                        .data(experience)
-                        .enter()
-                        .append('rect')
-                        .attr('height', 20)                 // bar height
-                        .attr({
-                            'x': 5,                         // tweak x bar start location
-                            'y': function(d,i){
-                                return yscale(i) + 15; }    // tweak y bar locations
-                        })
-                        .style('fill', function(d,i){ return colorScale(i); })
-                        .attr('width', function(d){ return 0; });
+        .attr("transform", "translate(100, 0)")
+        .attr('class','bars')
+        .selectAll('rect')
+        .data(experience)
+        .enter()
+        .append('rect')
+            .attr('height', 20)
+            .attr('x', 5)
+            .attr('y', function(d, i) { return yScale(i) + 15; })
+            .attr('width', function(d) {
+                return xScale(d);
+            })
+            .style('fill', function(d, i) { return colorScale(i); });
+
+    // == text labels for each bar
+    var transitext = d3.select('.bars')
+        .attr("transform", "translate(100, 0)")
+        .selectAll('text')
+        .data(experience)
+        .enter()
+        .append('text')
+            .attr('x', function(d) { return xScale(d) + 10; })   // x location offset for labels
+            .attr('y', function(d,i) { return yScale(i) + 30; })    // y location offset for labels
+            .text(function(d){ return d; }).style({'fill':'red', 'font-size':'14px'});  // label text
 
     // == animate bar growth (500ms transition)
     var transit = d3.select("svg").selectAll("rect")
-                        .data(experience)
-                        .transition()
-                        .duration(1000)
-                        .attr("width", function(d) {return xscale(d); });
+        .data(experience)
+        .transition()
+        .duration(1000)
+        .attr("width", function(d) {return xScale(d); });
 
-    // == text labels for each bar
-    var transitext = d3.select('#bars')
-                        .attr("transform", "translate(100, 0)")
-                        .selectAll('text')
-                        .data(experience)
-                        .enter()
-                        .append('text')
-                        .attr({
-                            'x':function(d){
-                                return xscale(d) + 10; },   // x location offset for labels
-                            'y':function(d,i){
-                                return yscale(i) + 30; }    // y location offset for labels
-                        })
-                        .text(function(d){ return d; }).style({'fill':'red', 'font-size':'14px'});  // label text
 
 }

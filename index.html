@@ -21,17 +21,21 @@
 
 		<!-- ======= ======= ======= header ======= ======= ======= -->
 		<div class="row header">
-			<div class="column column-12"><h1>d3 samples</h1></div>
+			<div class="column column-12">
+				<h1>d3 samples</h1>
+				<p class="intro"> A sampling of d3 charts and graphs.  The first one is interactive (click on bars to animate location). Most of the data is meaningless; the goal is to demonstrate various ways of visualizing "hardwired" and tsv file sources.</p>
+			</div>
 		</div>
 
 		<!-- ======= ======= ======= content ======= ======= ======= -->
 		<div class="row content">
 			<div class="column column-1">&nbsp;</div>
 			<div class="column column-10">
+				<div id="message"></div>
 				<div id="tooltips"></div>
 
 				<!-- ======= scatter graphs ======= -->
-				<div class="sectionTitle">
+				<div id="messageArea" class="sectionTitle">
 				    <p class="title"> SCATTER GRAPHS </p>
 				</div>
 				<div class="section">
@@ -44,6 +48,22 @@
 				</div>
 				<div class="section">
 					<div id="scatterPlot"></div>
+				</div>
+
+				<!-- ======= line Graph2 ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> LINE GRAPH 2 </p>
+				</div>
+				<div class="section">
+					<svg id="lineGraph2"></svg>
+				</div>
+
+				<!-- ======= line Graph ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> LINE GRAPH 1 </p>
+				</div>
+				<div class="section">
+					<svg id="lineGraph1"></svg>
 				</div>
 
 				<!-- ======= horizontal chart ======= -->
@@ -111,6 +131,15 @@
 					</svg>
 				</div>
 
+				<!-- ======= skills chart ======= -->
+				<div class="sectionTitle">
+				    <p class="title"> SKILLS CHART </p>
+				</div>
+				<div class="section">
+					<div id="skillsGraph"></div>
+				</div>
+
+
 			</div>
 			<div class="column column-1">&nbsp;</div>
 		</div>
@@ -133,7 +162,6 @@
 	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
 		<script type="text/javascript" src="d3skills.js"></script>
-		<script type="text/javascript" src="script.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -143,13 +171,15 @@
 				console.log('jQuery loaded');
 				console.log('document ready');
 
+				initLineGraph2();
+				initLineGraph();
 				initScatterGraphs();
 				initScatterPlot();
 				initHorizontalChart();
 				initDivChart();
 				initSvgChart();
 				initRemoteChart();
-				// initSkillsChart();
+				initSkillsChart();
 
 			});
 		</script>
