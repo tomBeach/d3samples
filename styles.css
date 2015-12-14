@@ -46,11 +46,7 @@ body {
 
 /* ======= rows ======= */
 .header > .column {
-  height: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+    height: 160px;
 }
 .content > .column {
   height: auto;
@@ -67,8 +63,18 @@ h1 {
     color: rebeccapurple;
 }
 .intro {
-    width: 70%;
-    text-align: center;
+    display: -webkit-box || -webkit-inline-box;
+    display: -moz-box || -moz-inline-box;
+    display: -ms-flexbox || -ms-inline-flexbox;
+    display: -webkit-flex || -webkit-inline-flex;
+    display: inline-flex;
+    display: flex;
+    flex-direction: -webkit-column;
+    justify-content: -webkit-center;
+    align-items: -webkit-center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
 }
 .title {
     text-align: center;
