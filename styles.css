@@ -46,7 +46,7 @@ body {
 
 /* ======= rows ======= */
 .header > .column {
-    height: 160px;
+    height: auto;
 }
 .content > .column {
   height: auto;
@@ -88,6 +88,13 @@ h1 {
     padding: 2px;
     text-align: center;
     background-color: #DAA520;
+}
+.introText {
+    text-align: left;
+    padding: 0 140px;
+}
+.hilite {
+    color: #ff6600;
 }
 
 /* ======= charts ======= */
