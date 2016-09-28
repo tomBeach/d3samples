@@ -208,12 +208,12 @@ function initScatterGraphs() {
         })
         rectGroup.on("mousedown", function() {
             // console.log("mousedown");
-            d3.select(this).style('fill', "red");
+            d3.select(this).style('fill', "white");
             d3.select(this).style("filter", "url(#drop-shadowB)")
             d3.select(this).transition()
                 .attr("height", 200)        // will make it bigger
                 .attr("y", 0)
-                .duration(400);
+                .duration(200);
         })
         document.addEventListener("mouseup", myFunction);
         function myFunction() {
