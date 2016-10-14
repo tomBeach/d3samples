@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>d3 Samples v4</title>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="mainV4.css">
+    </head>
+    <body>
+
+        <!-- ======= message ======= -->
+        <div id="message-box" class="menu">
+            <div id="messageHead">
+                <h3 class="box-label">note</h3>
+            </div>
+            <span id="message-text">...test page for work-in-progress</span>
+            <button id="close-message">Close</button>
+        </div>
+
+        <!-- ======= ======= ======= header ======= ======= ======= -->
+		<div class="row header">
+			<div class="column column-1">&nbsp;</div>
+			<div class="column column-10 intro">
+				<div>
+					<h1 class="title">d3 samples</h1>
+					<p class="introText">Newer d3 Version 4 samples.  Older version 3 samples found <a href="index.html">here</a>.</p>
+				</div>
+			</div>
+			<div class="column column-1">&nbsp;</div>
+		</div>
+
+		<!-- ======= ======= ======= content ======= ======= ======= -->
+		<div class="row content">
+			<div class="column column-1">&nbsp;</div>
+			<div class="column column-10">
+				<div id="message"></div>
+				<div id="tooltips"></div>
+
+				<!-- ======= animated graph ======= -->
+				<div id="messageArea" class="sectionTitle">
+				    <p class="title"> COURSE TIMELINE </p>
+				</div>
+				<div class="section">
+                    <div id="content">
+                        <div id="info-box" class="menu" style="display: block;"></div>
+                    </div>
+                    <div id="tooltips"></div>
+                    <div id="info-box" class="menu"></div>
+
+                    <!-- ======= messageText ======= -->
+                    <div id="messageText"><p class="label-mini">&nbsp;</p></div>
+				</div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+        <script type="text/javascript" src="timeline.js"></script>
+        <script type="text/javascript" src="mainV4.js"></script>
+
+        <script type="text/javascript">
+        	$(document).ready(function(){
+        	    console.log('jQuery loaded');
+        	});
+        </script>
+    </body>
+</html>
