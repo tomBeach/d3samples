@@ -88,7 +88,7 @@ h1 {
 }
 .introText {
     text-align: center;
-    padding: 0 140px;
+    padding: 0 240px;
 }
 .hilite {
     color: #ff6600;
@@ -153,7 +153,7 @@ h1 {
 #message-box {
     position: absolute;
     display: none;
-    top: 5%;
+    top: 10%;
     left: 50%;
     width: 360px;
     height: auto;
@@ -181,7 +181,7 @@ h1 {
 #info-box {
     position: absolute;
     display: none;
-    top: 22%;
+    top: 26%;
     left: 55%;
     width: auto;
     height: auto;
