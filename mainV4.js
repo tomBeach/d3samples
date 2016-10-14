@@ -78,7 +78,7 @@ clientApp = {
         // == MODULES ======= ======= ======= ======= =======
         for (var i = 0; i < modDurations.length; i++) {
             modName = "module_" + (i + 1);
-            modTitle = "Module  " + (i + 1);
+            modTitle = "Module " + (i + 1);
             modDur = modDurations[i] * 7;
             modEnd = modStart + modDur;
             modules[modName] = { modName:modName, modStart:modStart, modDur:modDur, modEnd:modEnd, modTitle:modTitle };

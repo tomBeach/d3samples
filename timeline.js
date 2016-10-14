@@ -9,6 +9,7 @@ function makeTimeline(moduleData) {
     var modCount = Object.keys(moduleData).length
     var modLabelArray = [];
     var modNamesArray = [];
+    var modTitlesArray = [];
     var modTicksArray = [];
     var moduleArray = [];
     var activityTotal = 0;
@@ -16,6 +17,7 @@ function makeTimeline(moduleData) {
 
     // ======= formatting =======
     var colors = ['#6666ff','#9999ff','#00ace6','#4dd2ff','#3385ff','#66a3ff','#99c2ff','#66cc99','#00cccc','#ff9966'];
+    var colorsLt = ['#b3b3ff','#ccccff','#ccf2ff','#ccf2ff','#cce0ff','#cce0ff','#cce0ff','#d9f2e6','#ccffff','#ffddcc'];
     var margin = {top: 20, right: 100, bottom: 80, left: 100};
     var width = 500;
     var height = 300;
@@ -36,11 +38,13 @@ function makeTimeline(moduleData) {
     $.each(moduleData, function(index, module) {
         console.log("\nmodule.modName: ", module.modName);
         modNamesArray.push(module.modName);
+        modTitlesArray.push(module.modTitle);
         modTicksArray.push(module.modStart);
         modLabelArray.push(makeModTicks(module));
         moduleArray.push(module);
     });
     modNamesArray.push("");
+    modTitlesArray.push("");
     console.log("modTicksArray:", modTicksArray);
 
     // ======= minMax =======
@@ -62,7 +66,7 @@ function makeTimeline(moduleData) {
         .domain(modTicksArray)
         .range([0, width]);
     var yScale = d3.scaleBand()
-        .domain(modNamesArray)
+        .domain(modTitlesArray)
         .rangeRound([0, height])
         .paddingInner(0.8);
     var colorScale = d3.scaleQuantize()
@@ -123,10 +127,10 @@ function makeTimeline(moduleData) {
                     return d.modName;
                 })
                 .attr("y", function(d, i) {
-                    return yScale(d.modName);
+                    return yScale(d.modTitle);
                 })
                 .attr("height", function(d, i) {
-                    return (height - yScale(d.modName));
+                    return (height - yScale(d.modTitle));
                 })
                 .attr("x", function(d) {
                     return xScale(d.modStart);
@@ -153,11 +157,11 @@ function makeTimeline(moduleData) {
             .attr("pointer-events", "none")
             .style("fill", function(d, i) {
                 // return colors[i];
-                return "palevioletred";
+                return "LightSteelBlue ";
             })
             .attr("y", function(d, i) {
                 var unitBands = getUnitBands(d, i);
-                return yScale(d.modName);
+                return yScale(d.modTitle);
             })
             .attr("height", yScale.bandwidth())
             .attr("x", function(d) {
@@ -184,7 +188,7 @@ function makeTimeline(moduleData) {
             .range([xScale(mod.modStart), xScale(mod.modEnd)]);
         var yUnitScale = d3.scaleBand()
             .domain(unitNameArray)
-            .rangeRound([yScale(mod.modName) + 8, yScale(mod.modName) + height/8 - 4])
+            .rangeRound([yScale(mod.modTitle) + 8, yScale(mod.modTitle) + height/8 - 4])
             .paddingInner(0.2);
 
         svgEl.selectAll("bar")
@@ -212,7 +216,7 @@ function makeTimeline(moduleData) {
         var modData = moduleData[modName];
         var modIndex = modNamesArray.indexOf(modName);
 
-        var infoHtml = "<div id='infoHead'><h3 class='box-label'>" + modData.modTitle + "</h3></div>";
+        var infoHtml = "<div id='infoHead' style='background-color:" + colors[modIndex] + "'><h3 class='box-label'>" + modData.modTitle + "</h3></div>";
         infoHtml += "<table id='info-table'><tr><th class='unit-col'></th><th class='act-col'></th></tr>";
         var unitIndex = -1;
 
@@ -222,7 +226,7 @@ function makeTimeline(moduleData) {
             infoHtml += "<tr><td id='" + unit.unitName + "' class='unit-label' ";
 
             // == styles for tds
-            infoHtml += "style='background-color:" + colors[modIndex] + "; border-top:solid 2px gray; text-align: right;'>";
+            infoHtml += "style='background-color:" + colorsLt[modIndex] + "; border-top:solid 2px gray; text-align: right;'>";
             infoHtml += unit.unitTitle + "</td>";
             var actIndex = -1;
 
@@ -235,13 +239,13 @@ function makeTimeline(moduleData) {
                     infoHtml += act.actTitle + "</td></tr>";
                 } else {
                     infoHtml += "<tr><td class='unit-label' ";
-                    infoHtml += "style='background-color:" + colors[modIndex] + ";'>&nbsp;</td>";
+                    infoHtml += "style='background-color:" + colorsLt[modIndex] + ";'>&nbsp;</td>";
                     infoHtml += "<td id='" + act.actName + "' class='act-label'>" + act.actTitle + "</td></tr>";
                 }
             });
         })
         infoHtml += "</table>";
-        infoHtml += "<div id='infoHead'><button id='close-info'>Close</button></div>";
+        infoHtml += "<div id='infoHead' style='background-color:" + colors[modIndex] + "'><button id='close-info'>Close</button></div>";
         return infoHtml;
     }
 
@@ -278,6 +282,7 @@ function makeTimeline(moduleData) {
         $('#close-info').on('click', function(e) {
             e.stopPropagation();
             $('#info-box').css('display', 'none');
+            $('#info-box').html('');
         });
 
     });
@@ -297,10 +302,17 @@ function makeTimeline(moduleData) {
         var rectY = parseInt(d3.select(this).attr("y")) + svgY - 30;
 
         // == build tooltip string
-        var infoBoxText = d3.select(this).attr('id');
+        var infoBoxId = d3.select(this).attr('id');
+        var infoBoxText = moduleData[infoBoxId].modTitle;
         var nextInfoBox = "<div id='infoBoxText'>" + infoBoxText +  "</div>";
         displayLabelBox("#tooltips", nextInfoBox, rectX, rectY, "show");
         d3.select(this).style('fill', "gray");
+
+        // == click mouse tooltip
+        if ($("#info-box").html() == "") {
+            $("#info-box").html("<p class='info-text'> click for details</p>");
+        }
+
     })
     $(".modAreas").on('mouseleave', function(e) {
         // console.log("mouseleave");
